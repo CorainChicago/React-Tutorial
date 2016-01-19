@@ -1,11 +1,23 @@
+var data = [
+  {id: 1, author: "Charlie F Bear", text: "He likes to watch Alex sleep.Comment 1"},
+  {id: 2, author: "Alex F", text: "Alex likes to sleep on a warm, soft blanket. Comment 2"},
+  {id: 3, author: "Soft Blanket", text: "I like it when she sleeps on me. Comment 3" }
+];
+
+
 var Comment = React.createClass({
+  rawMarkup: function(){
+    var rawMarkup = marked(this.props.children.toString(), {sanitize: true});
+    return {__html: rawMarkup};
+  },
+
   render: function(){
     return (
       <div className="comment">
         <h2 className="commentAuthor">
           {this.props.author}
         </h2>
-        {this.props.children}
+        <span dangerouslySetInnerHTML={this.rawMarkup()} />
       </div>
     );
   }
@@ -15,12 +27,18 @@ var Comment = React.createClass({
 
 var CommentList = React.createClass({
   render: function() {
-    return(
-      <div className="commentList">
-        <Comment author="Charlie Bear"> This is one comment from Charlie</Comment>
-        <Comment author="Alex Fedesna"> This is a comment from Alex. She is great</Comment>
-      </div>
+    var commentNodes = this.props.data.map(function(comment){
+      return (
+        <Comment author={comment.author} key={comment.id}>
+        {comment.text}
+        </Comment>
       );
+    });
+    return (
+      <div className="commentList">
+        {commentNodes}
+      </div>
+    );
   }
 });
 
@@ -35,19 +53,22 @@ var CommentForm = React.createClass({
 })
 
 var CommentBox = React.createClass({
+  getInitialState: function(){
+    return {data: []};
+  },
   render: function() {
     return (
       <div className="commentBox">
         Hello, world! I am a CommentBox.
         <h2>Comments</h2>
-        <CommentList />
+        <CommentList data={this.state.data}/>
         <CommentForm />
       </div>
     );
   }
 });
 ReactDOM.render(
-  <CommentBox />,
+  <CommentBox url="/api/comments" />,
   document.getElementById('content')
 );
 
